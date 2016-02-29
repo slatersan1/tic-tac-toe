@@ -3,12 +3,9 @@ require "set"
 
 board = [1,2,3,4,5,6,7,8,9]
 
-solutions = [[board{0}, board{1}, board{2}], [board{3}, board{4}, board{5}], [board{7}, board{8}, board{9}], 
-			[board{1}, board{4}, board{7}], [board{2}, board{}5, board{8}], [board{3}, board{6}, board{9}], 
-			[board{1}, board{5}, board{7}], [board{3}, board{5}, board{7}]]
-
-player1 = "X"
-player2 = "O"
+SOLUTIONS = [[0,1,2], [3,4,5], [6,7,8], 
+			[1,4,7], [2,5,8], [0,3,6], 
+			[0,4,8], [2,4,6]]
 
 ## DATA IN THE SYSTEM
 # * board
@@ -20,10 +17,10 @@ def greeting
 	puts
 	puts "Welcome to Tic-Tac-Toe!"
 	puts
-	puts "#{Player1} will be X, #{Player2} will be O"
+	puts "#{player1_name} will be X, #{player2_name} will be O"
 	puts "Each player will take a turn, first to connect
 		  three in a row either horizontally, vertically or
-		  diagonally wins."
+		  diagonally wins. #{player1_name} will go first."
 
 def display_board(board)
   puts "
@@ -33,17 +30,19 @@ def display_board(board)
     "
 end
 
-def player_names
+def player_names_pieces
 	puts "Player one enter your name: "
-    player1 = gets.chomp
+    player1_name = gets.chomp
     puts "Player two enter your name: "
-    player2 = gets.chomp
+    player2_name = gets.chomp
+end
 
 def win?(solutions)
-	if 
-
-    end
-		
+	SOLUTIONS.each do |pos|
+      if pos.all? {|p| player.pos.include? p}
+        return true
+      end
+    false		
 end
 
 def draw?
@@ -67,7 +66,7 @@ end
 def take_turn(current_player, selection)
 	puts "#{current_player} choose board position: "
 	selection = gets.chomp.to_i - 1
-	until (0..8).include?(selection)
+	until (1..9).include?(selection)
 		puts "Thats not a board position, try again: "
 		selection = gets.chomp.to_i - 1
 	end
@@ -75,8 +74,10 @@ def take_turn(current_player, selection)
 end		
 
 def tic_tac_toe
-	
 	greeting
+	player_names
+	player1 = "X"
+	player2 = "O"
 	display_board
 	current_player = player1
 	until game_over?(solutions)
@@ -99,25 +100,24 @@ def who_won(solutions)
 	else 
 		draw?
 	end
-end		
-			
+end	
 
+def play_again?
+  puts "Want to play Tic-Tac-Toe again? (y/n)"
+  choice = gets.chomp.downcase
 
+  until ["y", "n"].include?(choice)
+    puts "Please choose 'Y' or 'N'."
+    choice = gets.chomp.downcase
+  end
+  choice == "y"   
+end
 
+def play
+  more = play_again?
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  while more
+    tic_tac_toe
+    more = play_again?
+  end
+end
