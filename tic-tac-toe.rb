@@ -1,123 +1,96 @@
 require "pry"
-require "set"
 
-board = [1,2,3,4,5,6,7,8,9]
+SOLUTIONS = [[1,2,3],
+            [4,5,6],
+            [7,8,9],
+            [1,4,7],
+            [2,5,8],
+            [3,6,9],
+            [1,5,9],
+            [3,5,7]]
 
-SOLUTIONS = [[0,1,2], [3,4,5], [6,7,8], 
-			[1,4,7], [2,5,8], [0,3,6], 
-			[0,4,8], [2,4,6]]
-
-## DATA IN THE SYSTEM
-# * board
-# * player1 (name/piece), player2
-# * win conditions
-# * current_player => player1, player2
-# !board.is_a (numeric)
 def greeting
-	puts
-	puts "Welcome to Tic-Tac-Toe!"
-	puts
-	puts "#{player1_name} will be X, #{player2_name} will be O"
-	puts "Each player will take a turn, first to connect
-		  three in a row either horizontally, vertically or
-		  diagonally wins. #{player1_name} will go first."
+  puts
+  puts "Welcome to Tic-Tac-Toe!"
+  puts
+  puts "Each player will take a turn, first to connect
+      three in a row either horizontally, vertically or
+      diagonally wins. Player 1 will go first."
+end
 
 def display_board(board)
   puts "
-    #{board[0]} | #{board[1]} | #{board[2]}
-    #{board[3]} | #{board[4]} | #{board[5]}
-    #{board[6]} | #{board[7]} | #{board[8]}
+    ---------
+    | #{board[0]} | #{board[1]} | #{board[2]} |
+    | #{board[3]} | #{board[4]} | #{board[5]} |
+    | #{board[6]} | #{board[7]} | #{board[8]} |
+    ---------
     "
 end
 
-def player_names_pieces
-	puts "Player one enter your name: "
-    player1_name = gets.chomp
-    puts "Player two enter your name: "
-    player2_name = gets.chomp
+def choose_player
+  puts "Player 1 would you like to be 'X' or 'O' "
+  piece = gets.chomp.upcase
+  until ["X", "O"].include?(piece)
+    puts "Please choose either 'X' or 'O' "
+    piece = gets.chomp.upcase
+  end
+  piece
+end  
+
+def switch_player(player)
+  player == "X" ? "O" : "X"
 end
 
-def win?(solutions)
-	SOLUTIONS.each do |pos|
-      if pos.all? {|p| player.pos.include? p}
-        return true
-      end
-    false		
+def win?(board)
+	WINS.any? do |x, y, z|
+    board[x - 1] == board[y - 1] && board[y - 1] == board[z - 1]
+  end
 end
 
-def draw?
- 	!board.include?(1..9)
-	puts "DRAW!"
+def draw?(board)
+ 	board.all? { |piece| piece.is_a?(String) }
 end
 
-def game_over?(solutions)
-	win?(solutions) || draw?
+def game_over?(board)
+	 win?(board) || draw?(board)
 end	
 
-def update_board(current_player, board, selection)
-	updated_board = board
-	board.each do |selection|
-		if board.include?(selection)
-			updated_board.push(current_player)
-		end
-	updated_board
-end		
+def valid_turn(board)
+  board.select { |piece| piece.is_a?(Fixnum) }
+end
 
-def take_turn(current_player, selection)
-	puts "#{current_player} choose board position: "
-	selection = gets.chomp.to_i - 1
-	until (1..9).include?(selection)
-		puts "Thats not a board position, try again: "
-		selection = gets.chomp.to_i - 1
-	end
-	selection
+def take_turn(board, player)
+	display_board(board)
+  puts "#{player} choose board position: "
+  choice = gets.chomp.to_i
+  until valid_turn(board).include?(choice)
+    puts "Please choose a numer between 1 and 9: " 
+    choice = gets.chomp.to_i
+  end
+  choice - 1
 end		
 
 def tic_tac_toe
-	greeting
-	player_names
-	player1 = "X"
-	player2 = "O"
-	display_board
-	current_player = player1
-	until game_over?(solutions)
-		selection = take_turn
-		update_board
-
-		if current_player == player1
-		   current_player = player2
-		else
-			current_player = player1
-		end
-	system ("clear")
-	end
-	who_won(solutions)
-end
-
-def who_won(solutions)
-	if win?(solutions)
-		puts "Good job #{current_player}, you win!"
-	else 
-		draw?
-	end
-end	
-
-def play_again?
-  puts "Want to play Tic-Tac-Toe again? (y/n)"
-  choice = gets.chomp.downcase
-
-  until ["y", "n"].include?(choice)
-    puts "Please choose 'Y' or 'N'."
-    choice = gets.chomp.downcase
+  board = (1..9).to_a
+  current_player = choose_player
+  greeting
+  until game_over?(board)
+    move = take_turn(board, current_player)
+    board[move] = current_player
+    current_player = switch_player(current_player) unless game_over?(board)
   end
-  choice == "y"   
+  who_won(current_player, board)
 end
 
-def play
-  more = play_again?
-
-  while more
-    tic_tac_toe
-    more = play_again?
+def who_won(board, player)
+  if win?(board)
+    puts "Congratulations #{player} You win!!!!"
+  elsif draw?(board)
+    puts "DRAW!"
+  else
+    puts "Nice try #{player}. You suck."
   end
 end
+
+tic_tac_toe
